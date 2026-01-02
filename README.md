@@ -50,7 +50,8 @@ All agents are specialized in fluid dynamics and Navier-Stokes equations, and ca
    Create a `.env` file in the root directory:
    ```
    OPENAI_API_KEY=your_openai_api_key_here
-   GOOGLE_API_KEY=your_google_api_key_here  # Optional, for Google ADK
+   LANGSMITH_API_KEY=your_langsmith_api_key_here  # Optional, for distributed tracing
+   LANGSMITH_PROJECT=a2a-distributed-tracing  # Optional, defaults to "a2a-distributed-tracing"
    ```
 
 ## Testing Individual Agents
@@ -150,6 +151,7 @@ The script will:
   - Auto-generated agent card
   - Exposed via uvicorn
   - Acts as "mathematics professor" for other agents
+  - OpenTelemetry tracing to LangSmith (same project as other agents)
 
 ## A2A Protocol Details
 
@@ -170,7 +172,11 @@ The script will:
 
 ## Distributed Tracing
 
-The project uses `session_id` in metadata to group traces in LangSmith:
+The project uses multiple tracing mechanisms to track agent interactions:
+
+### Session ID Metadata
+
+All agents use `session_id` in metadata to group traces in LangSmith:
 
 ```python
 payload = {
@@ -182,11 +188,27 @@ payload = {
 }
 ```
 
-This allows you to:
+### OpenTelemetry Tracing (Google ADK)
+
+The Google ADK agent includes OpenTelemetry instrumentation that automatically sends traces to LangSmith:
+
+- **Basic tracing**: Uses `langsmith.integrations.otel.configure()` for automatic tracing
+- **Optional instrumentation**: Attempts to use `GoogleADKInstrumentor` if available (requires `openinference` package)
+- **Unified project**: All traces go to the same LangSmith project (`a2a-distributed-tracing` by default)
+- **Complete visibility**: Captures agent conversations, tool calls, and model interactions
+
+To enable tracing, set the `LANGSMITH_API_KEY` environment variable. The project name can be customized via `LANGSMITH_PROJECT` (defaults to `a2a-distributed-tracing`).
+
+**Note**: The `openinference` package for Google ADK instrumentation may not be available yet. The code will gracefully fall back to basic LangSmith tracing if the package is not installed.
+
+### Benefits
+
+This tracing setup allows you to:
 - Track complete conversations across multiple agents
 - Group related traces by session
 - Analyze agent-to-agent communication patterns
 - Debug distributed agent interactions
+- View detailed OpenTelemetry spans for Google ADK operations
 
 ## Development
 

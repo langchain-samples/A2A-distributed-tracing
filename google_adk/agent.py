@@ -2,6 +2,7 @@
 
 This agent demonstrates a simple calculator agent that can perform
 basic mathematical operations and is exposed via the A2A protocol.
+Includes OpenTelemetry tracing to LangSmith for distributed tracing.
 """
 
 from google.adk import Agent
@@ -11,7 +12,26 @@ from google.adk.models.lite_llm import LiteLlm
 from dotenv import load_dotenv
 import os
 
+# Configure OpenTelemetry tracing to LangSmith
+from langsmith.integrations.otel import configure
+
 load_dotenv()
+
+# Configure LangSmith tracing with the same project name as other agents
+# Project name can be overridden via LANGSMITH_PROJECT environment variable
+project_name = os.getenv("LANGSMITH_PROJECT", "a2a-distributed-tracing")
+configure(project_name=project_name)
+
+# Optional: Instrument Google ADK for OpenTelemetry tracing
+# Note: This requires openinference package which may not be available yet
+# The langsmith.integrations.otel.configure() above provides basic tracing
+try:
+    from openinference.instrumentation.google_adk import GoogleADKInstrumentor
+    GoogleADKInstrumentor().instrument()
+except ImportError:
+    # If openinference is not available, basic tracing via langsmith will still work
+    print("OpenInference not available, using basic tracing via LangSmith")
+    pass
 
 def calculate(expression: str) -> str:
     """Evaluate a mathematical expression safely.

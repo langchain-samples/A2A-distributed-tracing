@@ -14,5 +14,6 @@ dependencies = [
     "google-adk[a2a]>=0.1.0",
     "uvicorn>=0.30.0",
     "litellm>=1.80.5",
+    "langsmith>=0.4.26",
 ]
 
