@@ -1,0 +1,9 @@
+{
+    "graphs": {
+        "langgraph_agent": "./agent.py:graph"
+    },
+    "env": ".env",
+    "python_version": "3.12",
+    "dependencies": ["."],
+    "image_distro": "wolfi"
+}
