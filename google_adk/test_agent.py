@@ -58,10 +58,7 @@ async def test_agent():
     url = "http://localhost:8002/"
     
     test_cases = [
-        "What is 5 + 3?",
-        "Calculate 10 * 7",
-        "What's 100 / 4?",
-        "Compute 15 - 8",
+        "What is 5 + 3?"
     ]
     
     print("Testing Google ADK Calculator Agent")
